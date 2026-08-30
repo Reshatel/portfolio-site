@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Bricolage_Grotesque, Inter } from "next/font/google";
 import "./globals.css";
 import SmoothScrollProvider from "@/components/providers/SmoothScrollProvider";
+import { SITE_URL } from "@/lib/site";
 
 const bricolage = Bricolage_Grotesque({
   variable: "--font-bricolage",
@@ -15,7 +16,6 @@ const inter = Inter({
   weight: ["400", "500", "600"],
 });
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://example.com";
 const TITLE = "Maksym Ostapchuk — Frontend Developer";
 const DESCRIPTION =
   "Frontend developer building fast, interactive interfaces with React, Next.js, TypeScript and GSAP.";
