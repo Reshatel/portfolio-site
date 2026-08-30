@@ -1,0 +1,3727 @@
+@import "tailwindcss";
+
+:root {
+  --color-paper: #faf8f3;
+  --color-paper-alt: #f1ede4;
+  --color-ink: #161513;
+  --color-ink-muted: #6b6558;
+  --color-accent: #c1652f;
+  --color-accent-light: #e8836a;
+  --color-illustration-teal: #355e56;
+  --color-line: #e4dfd3;
+}
+
+@theme inline {
+  --color-paper: var(--color-paper);
+  --color-paper-alt: var(--color-paper-alt);
+  --color-ink: var(--color-ink);
+  --color-ink-muted: var(--color-ink-muted);
+  --color-accent: var(--color-accent);
+  --color-accent-light: var(--color-accent-light);
+  --color-illustration-teal: var(--color-illustration-teal);
+  --color-line: var(--color-line);
+
+  --font-display: var(--font-bricolage), "General Sans", sans-serif;
+  --font-body: var(--font-inter), sans-serif;
+
+  /* A real serif, for the diploma card and the seal's monogram only. The
+     approved design asks for one and this is a system stack, so the section
+     gets its certificate voice without a third webfont on the wire. */
+  --font-diploma: "Iowan Old Style", "Palatino Linotype", Palatino,
+    "Book Antiqua", "Hoefler Text", Georgia, "Times New Roman", serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: auto;
+}
+
+body {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  overflow-x: hidden;
+}
+
+/* Utility: alternate section background */
+.bg-paper-alt {
+  background: var(--color-paper-alt);
+}
+
+/* Custom text-selection color to match the accent */
+::selection {
+  background: var(--color-accent);
+  color: var(--color-paper);
+}
+
+/* Reusable stroke-drawn SVG line — animated via GSAP DrawSVGPlugin */
+.draw-line {
+  fill: none;
+  stroke: var(--color-accent);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Secondary-color variant, for visual variety among decorative figures */
+.draw-line-alt {
+  fill: none;
+  stroke: var(--color-accent-light);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Third contrasting variant — used only for large illustration figures,
+   never in UI chrome, to keep the palette disciplined elsewhere. */
+.draw-line-teal {
+  fill: none;
+  stroke: var(--color-illustration-teal);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* ------------------------------------------------------------------ */
+/*  About — section wipe                                               */
+/*  The section paints its own paper AND its content in behind a       */
+/*  slanted front driven by --wipe (112 = fully off-screen,            */
+/*  0 = fully painted). Defaults to 0 so the section is correct        */
+/*  before, and without, JS.                                           */
+/* ------------------------------------------------------------------ */
+.about-section {
+  --wipe: 0;
+}
+
+/* Rides 3px ahead of the front, leaving a hairline of accent on the edge.
+
+   It stops 2px short of the bottom, which is not cosmetic. This is a sheet of
+   flat accent sitting UNDER a clipped paper layer, and the section's height is
+   fractional (…674.66px). Both layers are clip-path'd, so both get their own
+   antialiased edge on that same half pixel — and the paper's ~66% coverage
+   over the accent's ~66% coverage leaves roughly a fifth of the accent
+   showing. The result was a warm hairline across the whole About/Stack seam
+   that nothing in the design asked for. The accent has no work to do down
+   there anyway: by the time the front is that low the wipe is long finished. */
+.about-edge {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: var(--color-accent);
+  clip-path: polygon(
+    0% calc(var(--wipe) * 1% - 3px),
+    100% calc((var(--wipe) - 12) * 1% - 3px),
+    100% calc(100% - 2px),
+    0% calc(100% - 2px)
+  );
+}
+
+.about-clip {
+  position: relative;
+  z-index: 1;
+  isolation: isolate;
+  clip-path: polygon(
+    0% calc(var(--wipe) * 1%),
+    100% calc((var(--wipe) - 12) * 1%),
+    100% 100%,
+    0% 100%
+  );
+}
+
+.about-fill {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: var(--color-paper-alt);
+}
+
+/* A hairline of accent left behind at the section seam — the visible
+   floor the hero's physics figures settle onto. */
+.about-seam {
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  z-index: 2;
+  height: 1px;
+  background: var(--color-accent);
+  opacity: 0.22;
+}
+
+/* The through-line is the SAME stroke as the hero signature it continues —
+   .draw-line already carries the weight, colour and caps, so this class adds
+   nothing visual and exists only as a query hook. Stacking is what keeps it
+   in its place: above a section's background, below everything drawn on it
+   (hero's physics figures, About's decorative figures, all copy and CTAs). */
+.site-thread {
+  /* intentionally no visual overrides */
+}
+
+/* ------------------------------------------------------------------ */
+/*  Stack — technology marks                                           */
+/*                                                                     */
+/*  Icons inherit `color`, so one property carries both the fill and    */
+/*  the outline and the hover swap is a single transition. At rest      */
+/*  everything is ink: the accent on this page belongs to the thread,   */
+/*  and nineteen brand colours competing with it would make the section */
+/*  a different site. Hover is where a mark gets to be itself.          */
+/* ------------------------------------------------------------------ */
+.stack-icon {
+  color: var(--color-ink);
+}
+
+.stack-icon-mark {
+  opacity: 0.74;
+  transition:
+    opacity 0.4s ease,
+    transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.stack-fill {
+  fill: currentColor;
+  transition: fill 0.35s ease;
+}
+
+.stack-stroke {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 0.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: stroke 0.35s ease;
+}
+
+/* The two hand-drawn marks live in a 48-box, not a 24-box, so they need
+   the heavier weight to match the brand marks optically. */
+.stack-stroke--drawn {
+  stroke-width: 2;
+}
+
+.stack-label {
+  color: var(--color-ink-muted);
+  transition: color 0.35s ease;
+}
+
+.stack-icon:hover {
+  color: var(--brand);
+}
+
+.stack-icon:hover .stack-icon-mark {
+  opacity: 1;
+  transform: translateY(-3px);
+}
+
+.stack-icon:hover .stack-label {
+  color: var(--color-ink);
+}
+
+/* ------------------------------------------------------------------ */
+/*  Stack — the pen lights the category it is passing                  */
+/*                                                                     */
+/*  Driven from the thread's own scrub callback, not from a separate    */
+/*  ScrollTrigger: the highlight is literally caused by where the pen   */
+/*  is, which is the point.                                            */
+/* ------------------------------------------------------------------ */
+.stack-cat-title {
+  color: var(--color-ink);
+  transition: color 0.45s ease;
+}
+
+.stack-cat-rule {
+  display: block;
+  height: 2px;
+  width: 46px;
+  margin-top: 10px;
+  background: var(--color-accent);
+  border-radius: 2px;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.stack-row[data-active] .stack-cat-title {
+  color: var(--color-accent);
+}
+
+.stack-row[data-active] .stack-cat-rule {
+  transform: scaleX(1);
+}
+
+.stack-row[data-active] .stack-icon-mark {
+  opacity: 0.92;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Stack — background field                                           */
+/*                                                                     */
+/*  Ruled paper under everything: it fills the empty right-hand side    */
+/*  without asking to be noticed, and it gives the serpentine something */
+/*  to be drawn ON. Masked at both seams so it never reads as a border. */
+/* ------------------------------------------------------------------ */
+.stack-grid {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image: radial-gradient(var(--color-line) 1px, transparent 1px);
+  background-size: 26px 26px;
+  opacity: 0.55;
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    #000 14%,
+    #000 86%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    #000 14%,
+    #000 86%,
+    transparent 100%
+  );
+}
+
+.stack-field {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.stack-figure {
+  fill: none;
+  stroke: var(--color-accent);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  opacity: 0.14;
+}
+
+/* The same teal About uses for its decorative figures, so the two sections
+   read as one hand. Fainter than the accent variant because teal sits darker
+   against warm paper at equal alpha. */
+.stack-figure-teal {
+  fill: none;
+  stroke: var(--color-illustration-teal);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  opacity: 0.11;
+}
+
+/* The rig exists only where it can actually run.
+   ------------------------------------------------------------------------
+   Its charms are placed by a transform the physics writes every frame, so
+   anywhere that loop does not run they would pile up in the corner of the
+   empty half with cords that have no `d`. The gate is therefore the exact
+   set of conditions `CredentialRig` itself checks — plus `data-pen`, which
+   only exists once the motion branch has run at all. */
+@media (min-width: 768px) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .edu-section[data-pen] .sc-arm,
+  .edu-section[data-pen] .sc-rig {
+    display: block;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stack-icon-mark,
+  .stack-cat-rule {
+    transition: none;
+  }
+  .stack-icon:hover .stack-icon-mark {
+    transform: none;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/*  Experience — the journey timeline                                  */
+/*                                                                     */
+/*  The spine is not drawn here and is not drawn in the component       */
+/*  either: it IS the site-wide thread, and the section threads it      */
+/*  through the markers' own measured centres. So this file decides     */
+/*  where the spine runs — centred between two columns on a wide        */
+/*  screen, tucked left on a narrow one — and the geometry follows      */
+/*  without ever knowing a breakpoint.                                  */
+/* ------------------------------------------------------------------ */
+.exp-field {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Experience — the year the pen is standing in                       */
+/*                                                                     */
+/*  The section's only piece of scale. The copy is small, the timeline  */
+/*  is one narrow column, and without something large the whole thing   */
+/*  reads as a list. This is set as architecture rather than as a       */
+/*  label: big enough to be a shape, faint enough that nothing has to   */
+/*  compete with it.                                                    */
+/*                                                                     */
+/*  It clips itself rather than the section clipping it — the section    */
+/*  must not be a clipping context, or the drawn figures and anything   */
+/*  else that wants to bleed would be cut with it.                      */
+/* ------------------------------------------------------------------ */
+.exp-ghost {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* Height 0: it is a position for the numerals, not a box. Held still in the
+   viewport by a scrubbed translate — see the note in the component. */
+.exp-ghost-inner {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 34vh;
+  height: 0;
+  will-change: transform;
+}
+
+.exp-ghost-year {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  text-align: center;
+  white-space: nowrap;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(6rem, 25vw, 22rem);
+  line-height: 0.78;
+  letter-spacing: -0.045em;
+  color: var(--color-ink);
+  opacity: 0;
+  transform: translateY(-50%) translateY(30px);
+  transition:
+    opacity 0.7s ease,
+    transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.exp-ghost-year[data-on] {
+  opacity: 0.05;
+  transform: translateY(-50%);
+}
+
+.exp-figure {
+  fill: none;
+  stroke: var(--color-accent);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  opacity: 0.12;
+}
+
+.exp-figure-teal {
+  fill: none;
+  stroke: var(--color-illustration-teal);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  opacity: 0.1;
+}
+
+.exp-list {
+  position: relative;
+}
+
+.exp-node {
+  position: relative;
+  padding-left: 46px;
+}
+
+.exp-node + .exp-node {
+  margin-top: 64px;
+}
+
+/* The dot the thread passes through. Its box is what the spine is measured
+   from, so nothing may animate this element itself — the pulse and the fill
+   are children, and a descendant's transform stays out of the parent's box. */
+.exp-marker {
+  position: absolute;
+  top: 3px;
+  left: 8px;
+  z-index: 2;
+  display: grid;
+  width: 16px;
+  height: 16px;
+  margin-left: -8px;
+  place-items: center;
+  pointer-events: none;
+}
+
+/* Filled with the section's own paper, so the thread runs behind the dot
+   rather than through the middle of it. */
+.exp-dot {
+  width: 11px;
+  height: 11px;
+  border-radius: 999px;
+  background: var(--color-paper-alt);
+  box-shadow: inset 0 0 0 2px var(--color-line);
+  transition:
+    background 0.5s ease,
+    box-shadow 0.5s ease;
+}
+
+.exp-node[data-reached] .exp-dot {
+  background: var(--color-accent);
+  box-shadow: inset 0 0 0 2px var(--color-accent);
+}
+
+/* The last milestone is the only open-ended one, so it is the only one that
+   keeps moving after the pen has gone past. */
+.exp-pulse {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  border: 1.5px solid var(--color-accent);
+  opacity: 0;
+}
+
+.exp-node[data-reached] .exp-pulse {
+  animation: exp-pulse 2.6s ease-out infinite;
+}
+
+@keyframes exp-pulse {
+  0% {
+    transform: scale(0.55);
+    opacity: 0.5;
+  }
+  70%,
+  100% {
+    transform: scale(2.1);
+    opacity: 0;
+  }
+}
+
+/* A tick reaching from the spine towards the card — drawn only once the pen
+   has claimed the node, so it reads as the line handing the card over. */
+.exp-node::after {
+  content: "";
+  position: absolute;
+  top: 10px;
+  left: 8px;
+  margin-left: 9px;
+  width: 22px;
+  height: 1px;
+  background: var(--color-accent);
+  opacity: 0.4;
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.exp-node[data-reached]::after {
+  transform: scaleX(1);
+}
+
+/* ------------------------------------------------------------------ */
+/*  Experience — the cards arrive with the pen, and leave with it       */
+/*                                                                     */
+/*  No ScrollTrigger of their own: `data-reached` is set by the thread  */
+/*  driver at the exact moment the line touches a dot, so a card cannot */
+/*  appear early or late by construction. Being a plain CSS transition  */
+/*  off an attribute is also what makes it reverse — scroll back up and */
+/*  each card returns to where it came from as the pen retreats past    */
+/*  its dot.                                                            */
+/*                                                                     */
+/*  Gated on `data-pen`, which only exists once the motion branch has   */
+/*  run: without JS the copy is simply there.                           */
+/* ------------------------------------------------------------------ */
+.exp-card {
+  --exp-from: -16px;
+}
+
+.exp-section[data-pen] .exp-card > * {
+  opacity: 0;
+  filter: blur(6px);
+  transform: translate(var(--exp-from), 10px);
+  transition:
+    opacity 0.55s ease,
+    filter 0.55s ease,
+    transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.exp-section[data-pen] .exp-card > *:nth-child(2) {
+  transition-delay: 0.07s;
+}
+
+.exp-section[data-pen] .exp-card > *:nth-child(3) {
+  transition-delay: 0.14s;
+}
+
+.exp-section[data-pen] .exp-node[data-reached] .exp-card > * {
+  opacity: 1;
+  filter: blur(0px);
+  transform: none;
+}
+
+.exp-date {
+  font-size: 12px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-ink-muted);
+  transition: color 0.45s ease;
+}
+
+.exp-node[data-active] .exp-date {
+  color: var(--color-accent);
+}
+
+.exp-tag {
+  display: inline-block;
+  margin-left: 12px;
+  border: 1px solid rgba(193, 101, 47, 0.35);
+  border-radius: 999px;
+  padding: 2px 10px;
+  letter-spacing: 0.14em;
+  color: var(--color-accent);
+}
+
+.exp-title {
+  margin-top: 8px;
+  margin-bottom: 8px;
+  transition: color 0.45s ease;
+}
+
+.exp-body {
+  max-width: 46ch;
+}
+
+/* Zig-zag: cards alternate sides of a centred spine. The marker keeps the
+   same 16px box on both breakpoints, so the measuring pass is unchanged —
+   only where it sits moves. */
+@media (min-width: 768px) {
+  .exp-node {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 96px;
+    padding-left: 0;
+  }
+
+  .exp-node + .exp-node {
+    margin-top: 88px;
+  }
+
+  .exp-marker {
+    left: 50%;
+  }
+
+  /* Each card comes in from the spine's side, so the line looks like it
+     pushed the card out rather than the card arriving on its own. */
+  .exp-node[data-side="left"] .exp-card {
+    grid-column: 1;
+    text-align: right;
+    --exp-from: 18px;
+  }
+
+  .exp-node[data-side="right"] .exp-card {
+    grid-column: 2;
+    --exp-from: -18px;
+  }
+
+  .exp-node[data-side="left"] .exp-body {
+    margin-left: auto;
+  }
+
+  .exp-node::after {
+    width: 40px;
+  }
+
+  .exp-node[data-side="left"]::after {
+    left: auto;
+    right: 50%;
+    margin-left: 0;
+    margin-right: 9px;
+    transform-origin: right center;
+  }
+
+  .exp-node[data-side="right"]::after {
+    left: 50%;
+    margin-left: 9px;
+    transform-origin: left center;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .exp-dot,
+  .exp-date,
+  .exp-ghost-year,
+  .exp-node::after,
+  .exp-section[data-pen] .exp-card > * {
+    transition: none;
+  }
+  .exp-pulse {
+    animation: none !important;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/*  Projects — the pen frames the work                                 */
+/*                                                                     */
+/*  The approved motif for this section is "the thread outlines the     */
+/*  card", so this is the first place the pen leaves the margins and     */
+/*  goes to work on the content. Every state below is keyed off an      */
+/*  attribute the thread driver sets — `data-reached` when the pen       */
+/*  arrives at a card, `data-framed` when it has closed the wrap — so    */
+/*  nothing here owns a ScrollTrigger, nothing can fire early or late,   */
+/*  and scrolling back up puts every card away exactly as it arrived.    */
+/*                                                                     */
+/*  All of it is gated on `data-pen`, which only exists once the motion  */
+/*  branch has run: without JS the gallery is simply there.              */
+/* ------------------------------------------------------------------ */
+.pj-field {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.pj-figure {
+  fill: none;
+  stroke: var(--color-accent);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  opacity: 0.12;
+}
+
+.pj-figure-teal {
+  fill: none;
+  stroke: var(--color-illustration-teal);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  opacity: 0.1;
+}
+
+.pj-count {
+  margin-left: 14px;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  color: var(--color-accent);
+}
+
+.pj-row {
+  position: relative;
+  --pj-from: -14px;
+}
+
+.pj-row + .pj-row {
+  margin-top: 140px;
+}
+
+/* ---- the card ---------------------------------------------------- */
+
+/* The measured box: `projectFrames()` wraps THIS rectangle, so nothing may
+   transform it. The hover lift, the parallax and the reveal all live on
+   descendants, whose transforms stay out of a parent's box. Its ruled border
+   is the pencil guide the pen inks over — which is also why the wrap only
+   needs three sides: the fourth is the one the pen came in and left on. */
+/* No aspect-ratio here on purpose: the chrome bar is a fixed pixel height, so
+   a single ratio on the frame would leave the WINDOW at a different shape at
+   every width. The window carries the ratio instead (see `.pj-window`) and the
+   frame is simply chrome + window — which is also the honest way round, since
+   a browser window is a viewport with a bar on top. */
+.pj-frame {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--color-line);
+  border-radius: 4px;
+  background: var(--color-paper-alt);
+  transition:
+    border-color 0.6s ease,
+    box-shadow 0.5s ease;
+}
+
+.pj-row[data-framed] .pj-frame {
+  border-color: rgba(193, 101, 47, 0.26);
+}
+
+.pj-frame:hover {
+  border-color: rgba(193, 101, 47, 0.55);
+  box-shadow: 0 22px 46px -30px rgba(22, 21, 19, 0.5);
+}
+
+/* ---- the sketched browser chrome --------------------------------- */
+
+.pj-chrome {
+  display: flex;
+  flex: 0 0 32px;
+  align-items: center;
+  gap: 12px;
+  height: 32px;
+  padding: 0 12px;
+  border-bottom: 1px solid var(--color-line);
+}
+
+.pj-dots {
+  flex: none;
+  width: 30px;
+  height: 8px;
+  overflow: visible;
+}
+
+/* Drawn, not painted: the same stroke-reveal the rest of the site uses for
+   anything the pen is supposed to have made. Circumference of r=4 is 25.1. */
+.pj-dot {
+  fill: none;
+  stroke: var(--color-accent);
+  stroke-width: 1.6;
+  stroke-dasharray: 26;
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset 0.5s ease;
+}
+
+.pj-section[data-pen] .pj-dot {
+  stroke-dashoffset: 26;
+}
+
+.pj-section[data-pen] .pj-row[data-open] .pj-dot {
+  stroke-dashoffset: 0;
+}
+
+.pj-section[data-pen] .pj-row[data-open] .pj-dot:nth-of-type(2) {
+  transition-delay: 0.08s;
+}
+
+.pj-section[data-pen] .pj-row[data-open] .pj-dot:nth-of-type(3) {
+  transition-delay: 0.16s;
+}
+
+.pj-bar {
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+  align-items: center;
+  gap: 2px;
+  height: 17px;
+  padding: 0 10px;
+  border: 1px solid var(--color-line);
+  border-radius: 999px;
+  background: var(--color-paper);
+  overflow: hidden;
+}
+
+/* The live URL types itself in once the pen has closed the frame. A stepped
+   max-width is the whole trick — no JS, no per-character markup, and it
+   reverses on the way back up like everything else in this section. */
+.pj-url {
+  display: inline-block;
+  max-width: var(--url-len);
+  overflow: hidden;
+  white-space: nowrap;
+  font-size: 10.5px;
+  letter-spacing: 0.015em;
+  color: var(--color-ink-muted);
+  transition: max-width 0.85s steps(26, end) 0.22s;
+}
+
+.pj-section[data-pen] .pj-url {
+  max-width: 0;
+}
+
+.pj-section[data-pen] .pj-row[data-open] .pj-url {
+  max-width: var(--url-len);
+}
+
+.pj-caret {
+  flex: none;
+  width: 1px;
+  height: 10px;
+  background: var(--color-accent);
+  opacity: 0;
+}
+
+.pj-section[data-pen] .pj-row[data-open] .pj-caret {
+  animation: pj-blink 0.26s steps(1, end) 0.22s 5 both;
+}
+
+@keyframes pj-blink {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+
+/* ---- the window, and the plate that pans inside it ---------------- */
+
+/* 1.85 is the shape of a browser viewport screenshot, so a shot dropped in
+   fills the glass with nothing cropped and nothing squashed. */
+.pj-window {
+  position: relative;
+  flex: none;
+  aspect-ratio: 1.85;
+  overflow: hidden;
+  background: var(--color-paper);
+}
+
+/* Develops when the card reaches the middle of the screen — not when the pen
+   closes the wrap, which measured a good 130px of scroll too late. See the
+   note on the trigger in Projects.tsx. `data-framed` still exists and still
+   comes from the pen; it just carries the quieter beat now — the card's ruled
+   border and its tags taking on a little warmth once the pen has been round. */
+.pj-section[data-pen] .pj-window {
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path 1.05s cubic-bezier(0.22, 1, 0.36, 1) 0.08s;
+}
+
+.pj-section[data-pen] .pj-row[data-side="left"] .pj-window {
+  clip-path: inset(0 0 0 100%);
+}
+
+.pj-section[data-pen] .pj-row[data-open] .pj-window {
+  clip-path: inset(0 0 0 0);
+}
+
+/* The thing behind the glass. One screenshot, several side by side, or the
+   generative placeholder — the width is what differs, and only the placeholder
+   is wider than the window (it has no edges worth keeping, so it can be
+   cropped for the sake of a little drift). This is the gallery, minus the pin
+   that the site-wide thread cannot survive. */
+.pj-plate {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  width: 100%;
+  will-change: transform;
+}
+
+.pj-plate[data-mode="sketch"] {
+  left: -12%;
+  display: block;
+  width: 124%;
+}
+
+.pj-shot {
+  position: relative;
+  flex: 1 0 0;
+  min-width: 0;
+}
+
+/* A hairline between frames, so the moment the strip is between two shots
+   reads as a filmstrip rather than as one broken picture. `inset` keeps it out
+   of the layout. */
+.pj-shot + .pj-shot {
+  box-shadow: inset 1px 0 0 rgba(250, 248, 243, 0.45);
+}
+
+/* Which shot the frame is on. In the chrome bar, not over the picture. */
+.pj-ticks {
+  display: flex;
+  flex: none;
+  gap: 4px;
+}
+
+.pj-tick {
+  width: 10px;
+  height: 2px;
+  border-radius: 1px;
+  background: var(--color-line);
+  transition: background 0.35s ease;
+}
+
+.pj-tick[data-on] {
+  background: var(--color-accent);
+}
+
+.pj-open {
+  position: absolute;
+  right: 14px;
+  bottom: 14px;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 13px;
+  border-radius: 999px;
+  background: var(--color-ink);
+  color: var(--color-paper);
+  font-family: var(--font-body);
+  font-size: 10.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  opacity: 0;
+  transform: translateY(9px);
+  pointer-events: none;
+  transition:
+    opacity 0.35s ease,
+    transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.pj-frame:hover .pj-open {
+  opacity: 1;
+  transform: none;
+}
+
+.pj-open-arrow {
+  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.pj-frame:hover .pj-open-arrow {
+  transform: translate(2px, -2px);
+}
+
+/* ---- the placeholder behind the glass ----------------------------- */
+
+.pj-sketch {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5%;
+  padding: 7% 6%;
+  background-image: radial-gradient(var(--color-line) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+
+.pj-sk-top {
+  display: flex;
+  flex: 1 1 60%;
+  min-height: 0;
+  gap: 6%;
+}
+
+.pj-sketch[data-flip] .pj-sk-top {
+  flex-direction: row-reverse;
+}
+
+.pj-sk-col {
+  display: flex;
+  flex: 1 1 44%;
+  flex-direction: column;
+  justify-content: center;
+  gap: 10px;
+}
+
+.pj-sk-bar {
+  height: 10px;
+  border-radius: 5px;
+  background: var(--color-line);
+}
+
+.pj-sk-bar--thin {
+  height: 6px;
+  opacity: 0.7;
+}
+
+.pj-sk-pill {
+  width: 96px;
+  max-width: 62%;
+  height: 20px;
+  margin-top: 6px;
+  border: 1px solid var(--color-line);
+  border-radius: 999px;
+}
+
+.pj-sk-panel {
+  flex: 1 1 56%;
+  border: 1px solid var(--color-line);
+  border-radius: 6px;
+}
+
+.pj-sk-row {
+  display: flex;
+  flex: 1 1 32%;
+  min-height: 0;
+  gap: 4%;
+}
+
+.pj-sk-tile {
+  flex: 1;
+  border: 1px solid var(--color-line);
+  border-radius: 6px;
+}
+
+/* 15%, not 5%: the plate is 124% of the window and hangs 12% off each side,
+   so anything measured from the plate's own right edge sits outside the glass
+   and gets clipped. */
+.pj-sk-num {
+  position: absolute;
+  right: 15%;
+  bottom: 3%;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(2rem, 7vw, 4rem);
+  line-height: 1;
+  color: transparent;
+  -webkit-text-stroke: 1px var(--color-line);
+}
+
+/* ---- the copy ----------------------------------------------------- */
+
+.pj-copy {
+  display: flex;
+  flex-direction: column;
+  margin-top: 30px;
+}
+
+.pj-head {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+}
+
+/* Outlined at rest, inked in accent while the pen is working this row —
+   the same "drawn, then committed" beat the whole site runs on. */
+.pj-index {
+  font-size: clamp(2.4rem, 5vw, 3.4rem);
+  font-weight: 700;
+  line-height: 0.9;
+  color: transparent;
+  -webkit-text-stroke: 1.4px var(--color-line);
+  transition: -webkit-text-stroke-color 0.5s ease;
+}
+
+.pj-row[data-active] .pj-index {
+  -webkit-text-stroke-color: var(--color-accent);
+}
+
+.pj-status {
+  border: 1px solid var(--color-line);
+  border-radius: 999px;
+  padding: 3px 11px;
+  font-size: 10.5px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-ink-muted);
+  transition:
+    color 0.5s ease,
+    border-color 0.5s ease;
+}
+
+.pj-row[data-active] .pj-status {
+  color: var(--color-accent);
+  border-color: rgba(193, 101, 47, 0.35);
+}
+
+.pj-title {
+  margin-top: 16px;
+}
+
+.pj-subtitle {
+  display: block;
+  margin-top: 7px;
+  font-size: 0.58em;
+  font-weight: 500;
+  color: var(--color-ink-muted);
+}
+
+.pj-hook {
+  max-width: 40ch;
+  margin-top: 14px;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.5;
+  color: var(--color-ink);
+}
+
+.pj-body {
+  max-width: 46ch;
+  margin-top: 10px;
+}
+
+.pj-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.pj-tag {
+  border: 1px solid var(--color-line);
+  border-radius: 999px;
+  padding: 4px 11px;
+  font-size: 11.5px;
+  color: var(--color-ink-muted);
+  transition: border-color 0.5s ease;
+}
+
+.pj-row[data-framed] .pj-tag {
+  border-color: rgba(193, 101, 47, 0.22);
+}
+
+.pj-actions {
+  margin-top: 24px;
+}
+
+.pj-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding-bottom: 3px;
+  border-bottom: 1px solid rgba(193, 101, 47, 0.4);
+  font-size: 14px;
+  color: var(--color-ink);
+  transition:
+    color 0.35s ease,
+    border-color 0.35s ease;
+}
+
+.pj-link:hover {
+  color: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+.pj-arrow {
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.pj-link:hover .pj-arrow {
+  transform: translate(3px, -3px);
+}
+
+/* ---- the reveal, driven by the pen -------------------------------- */
+
+.pj-section[data-pen] .pj-copy > * {
+  opacity: 0;
+  filter: blur(6px);
+  transform: translate(var(--pj-from), 12px);
+  transition:
+    opacity 0.6s ease,
+    filter 0.6s ease,
+    transform 0.75s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.pj-section[data-pen] .pj-copy > *:nth-child(2) {
+  transition-delay: 0.06s;
+}
+
+.pj-section[data-pen] .pj-copy > *:nth-child(3) {
+  transition-delay: 0.12s;
+}
+
+.pj-section[data-pen] .pj-copy > *:nth-child(4) {
+  transition-delay: 0.18s;
+}
+
+.pj-section[data-pen] .pj-copy > *:nth-child(5) {
+  transition-delay: 0.24s;
+}
+
+.pj-section[data-pen] .pj-copy > *:nth-child(6) {
+  transition-delay: 0.3s;
+}
+
+.pj-section[data-pen] .pj-row[data-reached] .pj-copy > * {
+  opacity: 1;
+  filter: blur(0px);
+  transform: none;
+}
+
+/* ---- zig-zag ------------------------------------------------------ */
+
+@media (min-width: 768px) {
+  .pj-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 56px;
+    align-items: center;
+  }
+
+  .pj-row + .pj-row {
+    /* Up from 176: the band has to hold a drawn figure and, on every other
+       step, the pen's loop. The number is not a taste call — it is measured.
+       Rows are centred, so the room a step actually has is the gap MINUS the
+       lead and tail of the two wraps either side (126px) minus however much
+       taller than its card each row happens to be. At 200 the two shortest
+       steps came out at 95 and 98px and silently lost their loop; at 212 the
+       shortest is 107, and the flourish needs 97. */
+    margin-top: 212px;
+  }
+
+  .pj-copy {
+    margin-top: 0;
+  }
+
+  .pj-row[data-side="right"] .pj-frame {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .pj-row[data-side="right"] .pj-copy {
+    grid-column: 1;
+    grid-row: 1;
+    /* Each column enters from the card's side, so the copy looks like the
+       line pushed it out rather than arriving on its own. */
+    --pj-from: 14px;
+  }
+
+  .pj-row[data-side="left"] .pj-frame {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .pj-row[data-side="left"] .pj-copy {
+    grid-column: 2;
+    grid-row: 1;
+    --pj-from: -14px;
+  }
+
+  .pj-chrome {
+    flex-basis: 36px;
+    height: 36px;
+  }
+
+  .pj-url {
+    font-size: 11.5px;
+  }
+}
+
+
+/* ------------------------------------------------------------------ */
+/*  Projects — the page under the work                                 */
+/* ------------------------------------------------------------------ */
+
+/* A cross-rule rather than Stack's dots: same hand, different paper, so two
+   ruled sections never look like the same screen. Masked at both seams. */
+.pj-grid {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(to right, var(--color-line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--color-line) 1px, transparent 1px);
+  background-size: 58px 58px;
+  opacity: 0.5;
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    #000 9%,
+    #000 91%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    #000 9%,
+    #000 91%,
+    transparent 100%
+  );
+}
+
+.pj-lead {
+  max-width: 48ch;
+  margin-top: 20px;
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--color-ink-muted);
+}
+
+/* Hung off the row, not placed at a percentage of the section: see the note in
+   Projects.tsx. Sits in the band below its row, on the side the layout just
+   emptied, and well clear of the gutter the thread runs down. */
+.pj-row-deco {
+  position: absolute;
+  z-index: 0;
+  bottom: -112px;
+  left: 3%;
+  width: 96px;
+  height: 96px;
+  pointer-events: none;
+}
+
+.pj-row[data-side="left"] .pj-row-deco {
+  left: auto;
+  right: 3%;
+}
+
+@media (min-width: 768px) {
+  .pj-row-deco {
+    bottom: -168px;
+    left: 5%;
+    width: 132px;
+    height: 132px;
+  }
+
+  .pj-row[data-side="left"] .pj-row-deco {
+    left: auto;
+    right: 5%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pj-frame,
+  .pj-tick,
+  .pj-dot,
+  .pj-url,
+  .pj-window,
+  .pj-index,
+  .pj-status,
+  .pj-tag,
+  .pj-open,
+  .pj-section[data-pen] .pj-copy > * {
+    transition: none;
+  }
+  .pj-caret {
+    animation: none !important;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/*  Education — hanging scrolls                                        */
+/*                                                                     */
+/*  The section arrives as a SHEET LAID ON THE PAGE rather than as a    */
+/*  change of background colour: a deckled top edge, the alternate      */
+/*  stock underneath it, and a hairline of accent that inks itself      */
+/*  along the tear as it comes up. About's punch is a slanted wipe;     */
+/*  this is the other thing paper does.                                 */
+/*                                                                     */
+/*  On that page hang the documents, each rolled up under a rod and     */
+/*  unrolled by the thread itself — see `scrollRail()`. The only state  */
+/*  this file needs is `--roll`, written by the pen every frame, plus   */
+/*  two attributes for the moments that are genuinely discrete: the rod */
+/*  being hung and the scroll reaching the end of its paper.            */
+/*                                                                     */
+/*  All of it is gated on `data-pen`, which exists only once the motion */
+/*  branch has run. Without JS every scroll is simply open: `--roll`    */
+/*  defaults to 1 and the rod, rule and seal default to their finished  */
+/*  state. The reveal is an enhancement, never the thing standing       */
+/*  between a reader and the work.                                      */
+/* ------------------------------------------------------------------ */
+
+/* The section paints its own ground, so it must NOT be a clipping context:
+   the layers below clip themselves instead. Same reasoning as Experience. */
+.edu-sheet {
+  position: absolute;
+  inset: 30px 0 0;
+  z-index: 0;
+  pointer-events: none;
+  background: var(--color-paper-alt);
+}
+
+.edu-tear {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 34px;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  filter: drop-shadow(0 2px 3px rgba(22, 21, 19, 0.07));
+}
+
+.edu-tear svg {
+  display: block;
+}
+
+.edu-tear-fill {
+  fill: var(--color-paper-alt);
+}
+
+.edu-tear-ink {
+  fill: none;
+  stroke: var(--color-accent);
+  stroke-width: 1.4;
+  stroke-linecap: round;
+  opacity: 0.32;
+}
+
+/* Security paper. A fine diagonal weave: neither Stack's dots nor Projects'
+   cross-rule, so three ruled sections never read as the same screen. */
+.edu-weave {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    repeating-linear-gradient(26deg, var(--color-line) 0 1px, transparent 1px 12px),
+    repeating-linear-gradient(-26deg, var(--color-line) 0 1px, transparent 1px 12px);
+  opacity: 0.3;
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    #000 7%,
+    #000 88%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    #000 7%,
+    #000 88%,
+    transparent 100%
+  );
+}
+
+.edu-field {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* The engine-turned figure certificates carry. A real hypotrochoid — one
+   closed curve, so the pen draws it in a single stroke like everything else. */
+.edu-guilloche {
+  fill: none;
+  stroke: var(--color-accent);
+  stroke-width: 0.6;
+  opacity: 0.15;
+}
+
+.edu-guilloche--teal {
+  stroke: var(--color-illustration-teal);
+  opacity: 0.13;
+}
+
+.edu-rosette svg,
+.sc-watermark svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Hidden below md: on a narrow screen there is no empty margin for it to fill,
+   and it simply landed on the copy. */
+.edu-rosette--field {
+  display: none;
+  position: absolute;
+  top: 3%;
+  right: 1%;
+  width: 300px;
+  height: 300px;
+}
+
+.edu-lead {
+  max-width: 48ch;
+  margin-top: 20px;
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--color-ink-muted);
+}
+
+/* ---- the rail the scrolls hang beside ----------------------------- */
+
+.sc-list {
+  position: relative;
+  margin-top: 132px;
+  list-style: none;
+}
+
+/* Measured, never drawn. Where this sits is the layout's business: the
+   geometry reads its x rather than computing one, so CSS can run the rail
+   down the middle on a wide screen and along the margin on a narrow one
+   without the path ever knowing a breakpoint. */
+.sc-rail {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 1px;
+  pointer-events: none;
+}
+
+.sc-item {
+  position: relative;
+  margin-left: 34px;
+  --roll: 1;
+}
+
+.edu-section[data-pen] .sc-item {
+  --roll: var(--r, 0);
+}
+
+.sc-item + .sc-item {
+  margin-top: 104px;
+}
+
+/* ---- the rod, and the nail the thread knots onto ------------------ */
+
+.sc-rod {
+  position: absolute;
+  top: -9px;
+  left: -34px;
+  right: 0;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--color-ink);
+  opacity: 0.24;
+  transform-origin: left center;
+}
+
+.edu-section[data-pen] .sc-rod {
+  transform: scaleX(0);
+  transition: transform 0.75s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.edu-section[data-pen] .sc-item[data-tied] .sc-rod {
+  transform: scaleX(1);
+}
+
+/* The overhang the cords hang from. Its own element rather than a longer rod,
+   so both halves of the dowel can grow from the nail without a computed
+   transform-origin — and so the physics can read its box for the anchors. */
+.sc-arm {
+  display: none;
+  position: absolute;
+  top: -9px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--color-ink);
+  opacity: 0.24;
+}
+
+.sc-arm::after {
+  content: "";
+  position: absolute;
+  top: -2px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-ink);
+}
+
+.sc-nail {
+  position: absolute;
+  top: -16px;
+  left: -40px;
+  width: 12px;
+  height: 12px;
+  border: 1.5px solid var(--color-accent);
+  border-radius: 50%;
+  background: var(--color-paper-alt);
+}
+
+.edu-section[data-pen] .sc-nail {
+  opacity: 0;
+  transform: scale(0.4);
+  transition:
+    opacity 0.35s ease,
+    transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.edu-section[data-pen] .sc-item[data-tied] .sc-nail {
+  opacity: 1;
+  transform: none;
+}
+
+/* ---- the paper, and the roll that opens it ------------------------ */
+
+/* The measured box: this scroll's stretch of pen travel is derived from it,
+   so nothing may transform it. The roll and the paper are children for
+   exactly that reason. */
+.sc-sheet {
+  position: relative;
+}
+
+/* The only thing that rotates. Pivots at the rod, like a sheet hanging from
+   one, and cannot disturb the measured box above it. */
+.sc-swing {
+  position: relative;
+  transform-origin: 50% 0;
+  will-change: transform;
+}
+
+/* Clipped, not resized: the paper keeps its full height in the layout from
+   the first frame. If unrolling changed the layout, the section's own box
+   would move under the thread that is drawing it — and the measuring pass
+   would chase its own tail. */
+.sc-paper {
+  position: relative;
+  padding: 32px 28px 88px;
+  border: 1px solid var(--color-line);
+  border-radius: 3px;
+  background: var(--color-paper);
+  box-shadow:
+    0 1px 0 rgba(22, 21, 19, 0.02),
+    0 22px 36px -30px rgba(22, 21, 19, 0.65);
+  clip-path: inset(0 0 calc((1 - var(--roll)) * 100%) 0);
+}
+
+/* Rides the reveal boundary, so it is always at the pen's own height — and it
+   thins as it unwinds, because the paper on it is going onto the wall. */
+.sc-roll {
+  position: absolute;
+  right: -8px;
+  left: -8px;
+  top: calc(var(--roll) * 100%);
+  height: calc(13px + (1 - var(--roll)) * 12px);
+  border: 1px solid var(--color-line);
+  border-radius: 999px;
+  background: linear-gradient(180deg, #fffdf9 0%, var(--color-paper) 44%, #e7e1d3 100%);
+  box-shadow: 0 9px 16px -9px rgba(22, 21, 19, 0.55);
+  transform: translateY(-50%);
+}
+
+/* A rolled scroll with no rod above it is just a tube floating on the wall, so
+   it waits for the knot like everything else. */
+.edu-section[data-pen] .sc-roll {
+  opacity: 0;
+  transition: opacity 0.45s ease;
+}
+
+.edu-section[data-pen] .sc-item[data-tied] .sc-roll {
+  opacity: 1;
+}
+
+/* The paper darkening as it curves into the roll. Lives INSIDE the clip, so
+   it is revealed with the sheet and never appears below the boundary. */
+.sc-curl {
+  position: absolute;
+  right: 0;
+  left: 0;
+  top: calc(var(--roll) * 100% - 30px);
+  height: 30px;
+  pointer-events: none;
+  background: linear-gradient(to bottom, rgba(22, 21, 19, 0) 0%, rgba(22, 21, 19, 0.075) 100%);
+}
+
+/* ---- what hangs in the empty half --------------------------------- */
+
+/* Above every document, not just its own.
+   ------------------------------------------------------------------------
+   The rows are positioned siblings with no z-index, so they paint in DOM
+   order — which meant a weight dragged over a NEIGHBOURING sheet slid behind
+   it and vanished. A z-index lifts every rig over every paper at once,
+   whichever row it belongs to. */
+.sc-rig {
+  display: none;
+  position: absolute;
+  top: -9px;
+  z-index: 5;
+  height: calc(100% + 150px);
+  pointer-events: none;
+}
+
+/* It lifts away as it goes, rather than blinking out: the physics keeps
+   running for the whole of this transition and is only put back once the rig
+   is invisible — see FADE_OUT in `CredentialRig`. */
+.edu-section[data-pen] .sc-rig {
+  opacity: 0;
+  transform: translateY(-16px);
+  transition:
+    opacity 0.55s ease,
+    transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.edu-section[data-pen] .sc-item[data-tied] .sc-rig {
+  opacity: 1;
+  transform: none;
+}
+
+/* `overflow: visible` is the whole fix for "the cord vanishes above the rod".
+   An <svg> clips to its viewport by default, and a weight swung up past the
+   top of its own block puts the cord at a negative y — outside the viewBox,
+   and therefore cut off. The charms are plain elements and were never clipped,
+   which is why only the cords disappeared. */
+.sc-cords {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.sc-cord {
+  fill: none;
+  stroke: var(--color-ink);
+  stroke-width: 1.1;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.3;
+}
+
+.sc-charm {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: auto;
+  cursor: grab;
+}
+
+.sc-charm:active {
+  cursor: grabbing;
+}
+
+/* Each charm's BOX IS ITS BODY, so the cord meets its real top edge and the
+   collider is the shape you can see. */
+.sc-charm--seal {
+  width: 46px;
+  height: 46px;
+}
+
+/* A metal ball. The one place on this site with a real specular highlight —
+   it is what tells you the thing has weight before you touch it. */
+.sc-charm--bead {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 34% 27%, #fffdf8 0%, #e4dccb 24%, #a89d88 62%, #6d6656 100%);
+  box-shadow:
+    inset 0 -1px 2px rgba(22, 21, 19, 0.35),
+    0 7px 11px -7px rgba(22, 21, 19, 0.75);
+}
+
+/* A washer on the same cord: hollow, so it reads as lighter than the ball
+   even though both are metal. */
+.sc-charm--ring {
+  width: 36px;
+  height: 36px;
+  border: 3px solid #9c9382;
+  border-radius: 50%;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.7),
+    inset 0 -1px 0 rgba(22, 21, 19, 0.25),
+    0 7px 12px -8px rgba(22, 21, 19, 0.7);
+}
+
+.sc-charm svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.sc-wax-body {
+  fill: rgba(193, 101, 47, 0.16);
+  stroke: var(--color-accent);
+  stroke-width: 1.2;
+}
+
+.sc-wax-ring {
+  fill: none;
+  stroke: var(--color-accent);
+  stroke-width: 1;
+  stroke-dasharray: 2 4;
+  opacity: 0.55;
+}
+
+.sc-wax-mark {
+  fill: var(--color-accent);
+  opacity: 0.5;
+}
+
+.sc-wax-tick {
+  stroke: var(--color-accent);
+  stroke-width: 1.3;
+  stroke-linecap: round;
+  opacity: 0.5;
+}
+
+.sc-rule {
+  position: absolute;
+  inset: 10px;
+  border: 1px solid var(--color-line);
+  border-radius: 2px;
+  pointer-events: none;
+}
+
+.edu-section[data-pen] .sc-rule {
+  opacity: 0;
+  transition:
+    opacity 0.8s ease,
+    border-color 0.8s ease;
+}
+
+.edu-section[data-pen] .sc-item[data-open] .sc-rule {
+  opacity: 1;
+  border-color: rgba(193, 101, 47, 0.28);
+}
+
+.sc-watermark {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 260px;
+  height: 260px;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+/* ---- the copy ----------------------------------------------------- */
+
+.sc-kicker {
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--color-ink-muted);
+}
+
+.sc-title {
+  position: relative;
+  margin-top: 14px;
+  font-size: clamp(1.7rem, 3.4vw, 2.5rem);
+  line-height: 1.1;
+  letter-spacing: 0.005em;
+  color: var(--color-ink);
+}
+
+.sc-item[data-kind="badge"] .sc-title {
+  font-size: clamp(1.35rem, 2.4vw, 1.85rem);
+}
+
+.sc-org {
+  position: relative;
+  max-width: 40ch;
+  margin-top: 12px;
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: var(--color-ink);
+}
+
+.sc-item[data-kind="badge"] .sc-org {
+  font-size: 12.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-ink-muted);
+}
+
+.sc-meta {
+  position: relative;
+  margin-top: 6px;
+  font-size: 13px;
+  color: var(--color-ink-muted);
+}
+
+.sc-note {
+  position: relative;
+  max-width: 48ch;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--color-line);
+  font-size: 13.5px;
+  line-height: 1.62;
+  color: var(--color-ink-muted);
+}
+
+/* ---- the seal, pressed when the paper runs out -------------------- */
+
+.sc-seal {
+  position: absolute;
+  right: 22px;
+  bottom: 24px;
+  width: 50px;
+  height: 50px;
+}
+
+.sc-seal svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.sc-seal-ring {
+  fill: none;
+  stroke: var(--color-accent);
+  stroke-width: 1.2;
+  opacity: 0.5;
+}
+
+.sc-seal-ring--in {
+  stroke-dasharray: 2 4;
+  opacity: 0.36;
+}
+
+.sc-seal-mark {
+  fill: var(--color-accent);
+  opacity: 0.42;
+}
+
+.sc-seal-tick {
+  stroke: var(--color-accent);
+  stroke-width: 1.4;
+  stroke-linecap: round;
+  opacity: 0.5;
+}
+
+.edu-section[data-pen] .sc-seal {
+  opacity: 0;
+  transform: rotate(-28deg) scale(0.5);
+  transition:
+    opacity 0.35s ease,
+    transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.edu-section[data-pen] .sc-item[data-open] .sc-seal {
+  opacity: 0.92;
+  transform: rotate(-6deg);
+}
+
+/* One ring pushed out of the seal at the moment it lands. */
+.sc-seal::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: 1px solid var(--color-accent);
+  border-radius: 50%;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.edu-section[data-pen] .sc-item[data-open] .sc-seal::after {
+  animation: sc-press 0.9s ease-out 0.05s 1;
+}
+
+@keyframes sc-press {
+  0% {
+    opacity: 0.45;
+    transform: scale(0.85);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.6);
+  }
+}
+
+/* ---- wide ---------------------------------------------------------- */
+
+@media (min-width: 768px) {
+  /* Room for the pen to swing from the left margin onto the centre rail.
+     It is a 680px crossing; give it less than about half that in height and
+     it stops being a gesture and becomes a diagonal ruled across the copy. */
+  .sc-list {
+    margin-top: 268px;
+  }
+
+  /* Down the middle: the scrolls hang alternately either side of it, so the
+     pen is beside every one of them without ever crossing the page. */
+  .sc-rail {
+    left: 50%;
+  }
+
+  .sc-item {
+    width: calc(50% - 38px);
+    margin-left: 0;
+  }
+
+  .sc-item[data-side="right"] {
+    margin-left: calc(50% + 38px);
+  }
+
+  .sc-item + .sc-item {
+    margin-top: 150px;
+  }
+
+  .sc-item[data-side="right"] .sc-rod {
+    left: -38px;
+    right: 0;
+    transform-origin: left center;
+  }
+
+  .sc-item[data-side="left"] .sc-rod {
+    left: 0;
+    right: -38px;
+    transform-origin: right center;
+  }
+
+  .sc-item[data-side="right"] .sc-nail {
+    left: -44px;
+    right: auto;
+  }
+
+  .sc-item[data-side="left"] .sc-arm {
+    left: calc(100% + 38px);
+    width: 330px;
+    transform-origin: left center;
+  }
+
+  .sc-item[data-side="left"] .sc-arm::after {
+    right: -3px;
+  }
+
+  .sc-item[data-side="right"] .sc-arm {
+    right: calc(100% + 38px);
+    width: 330px;
+    transform-origin: right center;
+  }
+
+  .sc-item[data-side="right"] .sc-arm::after {
+    left: -3px;
+  }
+
+  .edu-section[data-pen] .sc-arm {
+    transform: scaleX(0);
+    transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.12s;
+  }
+
+  .edu-section[data-pen] .sc-item[data-tied] .sc-arm {
+    transform: scaleX(1);
+  }
+
+  .sc-item[data-side="left"] .sc-rig {
+    left: calc(100% + 38px);
+    width: calc(100% + 38px);
+  }
+
+  .sc-item[data-side="right"] .sc-rig {
+    right: calc(100% + 38px);
+    width: calc(100% + 38px);
+  }
+
+  .sc-item[data-side="left"] .sc-nail {
+    left: auto;
+    right: -44px;
+  }
+
+  .sc-paper {
+    padding: 44px 40px 104px;
+  }
+
+  .sc-item[data-kind="badge"] .sc-paper {
+    padding: 34px 32px 84px;
+  }
+
+  .edu-rosette--field {
+    display: block;
+    width: 430px;
+    height: 430px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sc-rod,
+  .sc-nail,
+  .sc-rule,
+  .sc-roll,
+  .sc-seal,
+  .sc-arm,
+  .sc-rig {
+    transition: none;
+  }
+
+  .sc-seal::after {
+    animation: none;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/*  Featured Collaboration — the flight plan                           */
+/*                                                                     */
+/*  The case study is a flight academy, so this section is a CHART and  */
+/*  the thread is the ROUTE drawn on it. It arrives as the stub of a    */
+/*  boarding pass — the previous stock carries on for thirty pixels, a  */
+/*  punched line runs across, the new paper begins below it — and it    */
+/*  is the only section on the site with no ruled grid: range rings, a  */
+/*  compass rose and a course arc instead, because a fourth grid would  */
+/*  only have been a fourth grid.                                       */
+/*                                                                     */
+/*  Three attributes carry every state here, and the pen sets all       */
+/*  three: `data-drafted` (the brief), `data-built` (the build) and     */
+/*  `data-live` (the result). The browser window on the right builds    */
+/*  itself out of them — wireframe, then blocked out, then the actual   */
+/*  site — so the case study literally constructs the thing it is       */
+/*  describing while you read it.                                       */
+/*                                                                     */
+/*  All of it is gated on `data-pen`. Without JS the copy is simply     */
+/*  copy and the window simply shows the site: the reveal is an         */
+/*  enhancement, never the thing standing between a reader and the      */
+/*  work.                                                               */
+/* ------------------------------------------------------------------ */
+
+/* The stub of the previous stock. The holes in the perforation below are
+   real gaps in the new sheet, so something has to show through them —
+   this is that something. */
+.fc-stub {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 34px;
+  z-index: 0;
+  pointer-events: none;
+  background: var(--color-paper-alt);
+}
+
+.fc-perf {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 34px;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  filter: drop-shadow(0 2px 3px rgba(22, 21, 19, 0.06));
+}
+
+.fc-perf svg {
+  display: block;
+}
+
+.fc-perf-fill {
+  fill: var(--color-paper);
+}
+
+.fc-perf-ink {
+  fill: none;
+  stroke: var(--color-accent);
+  stroke-width: 1.3;
+  stroke-linecap: round;
+  opacity: 0.38;
+}
+
+/* The section paints its own ground, so it must NOT be a clipping context:
+   every layer below clips itself. Same reasoning as Experience and Education. */
+.fc-sheet {
+  position: absolute;
+  inset: 34px 0 0;
+  z-index: 0;
+  pointer-events: none;
+  background: var(--color-paper);
+}
+
+/* Range rings from a station off the bottom-left corner. Not a grid: Stack
+   rules with dots, Projects with a cross-rule, Education with a weave, and a
+   fourth would read as the same page again.
+
+   Drawn as five stroked circles rather than a `repeating-radial-gradient`
+   under a mask. The gradient version was correct and expensive: a masked
+   radial gradient the size of the section is re-rastered as it moves, which
+   is exactly the cost you do not want on the longest section of the page. */
+.fc-ringset {
+  position: absolute;
+  left: -980px;
+  bottom: -840px;
+  width: 1800px;
+  height: 1800px;
+}
+
+.fc-ringset svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.fc-ring {
+  fill: none;
+  stroke: var(--color-line);
+  stroke-width: 1.4;
+  opacity: 0.55;
+}
+
+.fc-field {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.fc-chart-line {
+  fill: none;
+  stroke: var(--color-accent);
+  stroke-width: 0.8;
+  stroke-linecap: round;
+  opacity: 0.16;
+}
+
+.fc-chart-line[data-heavy] {
+  stroke-width: 1.2;
+  opacity: 0.22;
+}
+
+.fc-chart-line--star {
+  opacity: 0.1;
+}
+
+.fc-chart-line--teal {
+  stroke: var(--color-illustration-teal);
+  stroke-width: 1;
+  opacity: 0.14;
+}
+
+.fc-rose,
+.fc-course {
+  position: absolute;
+  display: none;
+}
+
+.fc-rose svg,
+.fc-course svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* ---- the aircraft that rides the pen ------------------------------ */
+
+.fc-air {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* A zero-sized box AT the pen: the transform written every frame moves this
+   point, and the drawing hangs off it centred, so the rotation happens about
+   the pen itself and never about a corner. */
+.fc-plane {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+  opacity: 0;
+  transition: opacity 0.45s ease;
+  will-change: transform;
+}
+
+.fc-plane[data-flying] {
+  opacity: 1;
+}
+
+.fc-plane svg {
+  position: absolute;
+  left: -13px;
+  top: -13px;
+  width: 26px;
+  height: 26px;
+  display: block;
+}
+
+.fc-plane path {
+  fill: var(--color-accent);
+  stroke: var(--color-paper);
+  stroke-width: 0.8;
+  stroke-linejoin: round;
+}
+
+/* ---- the header --------------------------------------------------- */
+
+.fc-header {
+  position: relative;
+}
+
+.fc-title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+  margin-top: 18px;
+}
+
+/* The client's mark, tinted into the palette rather than dropped in at full
+   brand blue: this page has one accent already, and it belongs to the line. */
+.fc-logo {
+  display: block;
+  width: 46px;
+  height: 40px;
+  flex: none;
+  /* The mark is re-inked rather than filtered: the source PNG is a blue logo
+     on white, so its white was stripped to alpha and the remaining shape
+     written in the palette's ink. Nothing here depends on a blend mode
+     behaving the same way in every browser. */
+  opacity: 0.88;
+}
+
+.fc-meta {
+  font-size: 13px;
+  color: var(--color-ink-muted);
+  letter-spacing: 0.01em;
+}
+
+.fc-lead {
+  max-width: 52ch;
+  margin-top: 20px;
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--color-ink-muted);
+}
+
+/* ---- the stamp pressed into the corner ---------------------------- */
+
+.fc-stamp {
+  display: none;
+  position: absolute;
+  top: 4px;
+  right: 2px;
+  z-index: 10;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 10px 18px;
+  border: 1.5px dashed rgba(193, 101, 47, 0.5);
+  border-radius: 6px;
+  color: var(--color-accent);
+  text-align: center;
+  transform: rotate(-8deg);
+  opacity: 0.9;
+}
+
+.fc-stamp::after {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  border: 1px solid rgba(193, 101, 47, 0.28);
+  border-radius: 4px;
+  pointer-events: none;
+}
+
+.fc-stamp-top,
+.fc-stamp-bottom {
+  font-size: 8.5px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+.fc-stamp-mid {
+  font-family: var(--font-display);
+  font-size: 13px;
+  letter-spacing: 0.08em;
+}
+
+/* ---- the legs of the route ---------------------------------------- */
+
+/* The window has to STAY on screen while the legs are read: it builds itself
+   as the pen passes each waypoint, and a build nobody is looking at is not a
+   build. So the panel is sticky at both sizes — a flex column here, an
+   explicit two-row grid at md — and the stub travels with neither, because on
+   a phone a sticky block that tall would own half the screen. */
+/* The gap above the body is not air: the crossing that opens the section
+   needs vertical room to be a curve rather than a diagonal, and on a narrow
+   screen it also has to finish above the window. Size of the gesture decides
+   the layout, as with the deep gap above Education's first scroll. */
+.fc-body {
+  position: relative;
+  margin-top: 172px;
+  display: flex;
+  flex-direction: column;
+  gap: 56px;
+}
+
+.fc-legs {
+  order: 0;
+}
+
+/* On a narrow screen the wrapper disappears from the layout and NOTHING
+   travels: a window that follows the reader down a phone screen covers the
+   very copy it is illustrating. It simply sits after the legs, in the flow,
+   and shows the finished site. The whole build-as-you-read idea is a wide
+   screen's privilege — there is room for it there. */
+.fc-side {
+  display: contents;
+}
+
+.fc-panel {
+  order: 1;
+}
+
+.fc-notes {
+  order: 2;
+}
+
+.fc-legs {
+  position: relative;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 88px;
+  padding-left: 52px;
+}
+
+.fc-leg {
+  position: relative;
+}
+
+/* The waypoint symbol, and the fix the route is flown through. Its box is
+   what `flightRoute()` measures, so nothing here may transform it — the mark
+   inside it animates instead. The horizontal offsets are the whole reason the
+   route has course changes at all: CSS decides where each fix sits, and the
+   geometry follows without knowing a number. */
+.fc-fix {
+  position: absolute;
+  left: calc(-52px + var(--fix-dx, 0px));
+  top: 1px;
+  display: block;
+  width: 26px;
+  height: 26px;
+}
+
+.fc-leg:nth-child(2) .fc-fix {
+  --fix-dx: 10px;
+}
+
+.fc-leg:nth-child(3) .fc-fix {
+  --fix-dx: 4px;
+}
+
+.fc-fix svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.fc-fix-mark {
+  fill: none;
+  stroke: var(--color-ink);
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+  opacity: 0.3;
+  transition: stroke 0.5s ease, opacity 0.5s ease;
+}
+
+.fc-fix-core {
+  fill: var(--color-accent);
+  transform-origin: 13px 15.2px;
+  transition: opacity 0.4s ease, transform 0.5s cubic-bezier(0.2, 1.5, 0.4, 1);
+}
+
+.fc-leg[data-reached] .fc-fix-mark {
+  stroke: var(--color-accent);
+  opacity: 1;
+}
+
+.fc-section[data-pen] .fc-fix-core {
+  opacity: 0;
+  transform: scale(0.3);
+}
+
+.fc-section[data-pen] .fc-leg[data-reached] .fc-fix-core {
+  opacity: 1;
+  transform: none;
+}
+
+.fc-wpt {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 11px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--color-ink-muted);
+}
+
+.fc-wpt-rule {
+  display: block;
+  width: 20px;
+  height: 1px;
+  background: var(--color-line);
+  transition: width 0.5s ease, background 0.5s ease;
+}
+
+.fc-leg[data-reached] .fc-wpt {
+  color: var(--color-accent);
+}
+
+.fc-leg[data-reached] .fc-wpt-rule {
+  width: 40px;
+  background: var(--color-accent);
+}
+
+.fc-leg-title {
+  margin-top: 10px;
+  font-size: 22px;
+  line-height: 1.2;
+  color: var(--color-ink);
+}
+
+.fc-leg-body {
+  max-width: 46ch;
+  margin-top: 12px;
+  font-size: 14.5px;
+  line-height: 1.7;
+  color: var(--color-ink-muted);
+}
+
+/* The copy arrives with the pen, and leaves the same way on the way back up:
+   an attribute the driver sets, so it cannot fire early or late. */
+/* Opacity and transform only — both composited. An earlier version blurred
+   the copy in as well, which meant re-rendering three blocks of text every
+   frame of the transition, in both directions, on the longest section of the
+   page. It read almost the same and cost a great deal more. */
+.fc-section[data-pen] .fc-leg > :not([data-fix]) {
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+
+.fc-section[data-pen] .fc-leg > :not([data-fix]):nth-child(3) {
+  transition-delay: 0.08s;
+}
+
+.fc-section[data-pen] .fc-leg > :not([data-fix]):nth-child(4) {
+  transition-delay: 0.16s;
+}
+
+.fc-section[data-pen] .fc-leg[data-reached] > :not([data-fix]) {
+  opacity: 1;
+  transform: none;
+}
+
+/* ---- the window that builds itself -------------------------------- */
+
+.fc-frame {
+  position: relative;
+  border: 1px solid var(--color-line);
+  border-radius: 14px;
+  background: var(--color-paper);
+  overflow: hidden;
+  box-shadow: 0 20px 44px -30px rgba(22, 21, 19, 0.45);
+}
+
+.fc-chrome {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 14px;
+  border-bottom: 1px solid var(--color-line);
+  background: var(--color-paper-alt);
+}
+
+.fc-dots {
+  width: 46px;
+  height: 12px;
+  flex: none;
+}
+
+.fc-dot {
+  fill: none;
+  stroke: var(--color-ink-muted);
+  stroke-width: 1.2;
+  opacity: 0.45;
+  transition: stroke 0.5s ease, opacity 0.5s ease;
+}
+
+.fc-section[data-live] .fc-dot {
+  stroke: var(--color-accent);
+  opacity: 0.9;
+}
+
+.fc-bar {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  height: 22px;
+  padding: 0 10px;
+  border: 1px solid var(--color-line);
+  border-radius: 11px;
+  background: var(--color-paper);
+  overflow: hidden;
+}
+
+.fc-url {
+  white-space: nowrap;
+  overflow: hidden;
+  font-size: 11.5px;
+  letter-spacing: 0.05em;
+  color: var(--color-ink-muted);
+  max-width: var(--url-len);
+}
+
+/* Types itself, the same way the addresses in Projects do: stepped max-width,
+   no per-letter markup and no JS — so it reverses on the way back up. */
+.fc-section[data-pen] .fc-url {
+  max-width: 0;
+  transition: max-width 0.9s steps(22);
+}
+
+.fc-section[data-pen][data-live] .fc-url {
+  max-width: var(--url-len);
+}
+
+.fc-caret {
+  width: 1px;
+  height: 12px;
+  background: var(--color-accent);
+  opacity: 0;
+}
+
+.fc-section[data-pen][data-built] .fc-caret {
+  opacity: 1;
+  animation: fc-blink 1.05s steps(1) infinite;
+}
+
+@keyframes fc-blink {
+  0%,
+  50% {
+    opacity: 1;
+  }
+  51%,
+  100% {
+    opacity: 0;
+  }
+}
+
+.fc-live {
+  flex: none;
+  padding: 2px 8px;
+  border: 1px solid rgba(193, 101, 47, 0.5);
+  border-radius: 999px;
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  color: var(--color-accent);
+  transition: opacity 0.5s ease;
+}
+
+.fc-section[data-pen] .fc-live {
+  opacity: 0;
+}
+
+.fc-section[data-pen][data-live] .fc-live {
+  opacity: 1;
+}
+
+.fc-window {
+  position: relative;
+  aspect-ratio: 1.85;
+  background: var(--color-paper);
+  overflow: hidden;
+}
+
+.fc-wire {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  transition: opacity 0.9s ease;
+}
+
+.fc-wl {
+  fill: none;
+  stroke: var(--color-ink);
+  stroke-width: 1.3;
+  stroke-linecap: round;
+  opacity: 0.45;
+}
+
+/* `pathLength="1"` normalises every shape, so one rule draws all of them and
+   nothing has to know its own length. */
+.fc-section[data-pen] .fc-wl {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  transition: stroke-dashoffset 0.8s ease calc(var(--i, 0) * 0.07s);
+}
+
+.fc-section[data-pen][data-drafted] .fc-wl {
+  stroke-dashoffset: 0;
+}
+
+.fc-wire-fills rect {
+  fill: var(--color-accent);
+  opacity: 0.1;
+  transition: opacity 0.7s ease;
+}
+
+.fc-section[data-pen] .fc-wire-fills rect {
+  opacity: 0;
+}
+
+.fc-section[data-pen][data-built] .fc-wire-fills rect {
+  opacity: 0.1;
+}
+
+.fc-section[data-pen][data-built] .fc-wire-fills rect:nth-child(2) {
+  transition-delay: 0.1s;
+}
+
+.fc-section[data-pen][data-built] .fc-wire-fills rect:nth-child(3) {
+  transition-delay: 0.2s;
+}
+
+.fc-section[data-pen][data-built] .fc-wire-fills rect:nth-child(4) {
+  transition-delay: 0.28s;
+}
+
+.fc-section[data-pen][data-built] .fc-wire-fills rect:nth-child(5) {
+  transition-delay: 0.36s;
+}
+
+/* The drawing hands over to the real thing at the last waypoint. */
+.fc-section[data-pen][data-live] .fc-wire {
+  opacity: 0;
+}
+
+.fc-shot {
+  position: absolute;
+  inset: 0;
+  display: block;
+}
+
+.fc-section[data-pen] .fc-shot {
+  opacity: 0;
+  transition: opacity 0.9s ease;
+}
+
+.fc-section[data-pen][data-live] .fc-shot {
+  opacity: 1;
+}
+
+.fc-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 18px;
+}
+
+.fc-tag {
+  padding: 4px 11px;
+  border: 1px solid var(--color-line);
+  border-radius: 999px;
+  font-size: 11.5px;
+  letter-spacing: 0.05em;
+  color: var(--color-ink-muted);
+  transition: color 0.5s ease, border-color 0.5s ease;
+}
+
+.fc-section[data-live] .fc-tag {
+  border-color: rgba(193, 101, 47, 0.35);
+  color: var(--color-ink);
+}
+
+/* ---- the destination ---------------------------------------------- */
+
+.fc-actions {
+  margin-top: 76px;
+}
+
+/* The measured box. MagneticLink writes a transform on the anchor, and the
+   route's underline is derived from this box, so the two are kept apart. */
+.fc-cta {
+  display: inline-block;
+}
+
+/* A ticket rather than a text link. As a bare line of text it was the
+   quietest thing on the page — and the one thing in the section a recruiter
+   is meant to click. */
+.fc-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 22px 13px 17px;
+  border: 1px solid var(--color-line);
+  border-radius: 999px;
+  background: var(--color-paper);
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--color-ink);
+  transition: color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.fc-link:hover {
+  color: var(--color-accent);
+  border-color: rgba(193, 101, 47, 0.55);
+  box-shadow: 0 12px 26px -20px rgba(22, 21, 19, 0.7);
+}
+
+/* One punched hole, so the ticket is the same piece of paper as the tear at
+   the top of the section and the stub in the column. */
+.fc-link-punch {
+  width: 7px;
+  height: 7px;
+  border: 1px solid var(--color-line);
+  border-radius: 50%;
+  background: var(--color-paper-alt);
+  transition: border-color 0.3s ease, background 0.3s ease;
+}
+
+.fc-link:hover .fc-link-punch {
+  border-color: var(--color-accent);
+  background: var(--color-accent);
+}
+
+.fc-arrow {
+  display: inline-block;
+  transition: transform 0.3s ease;
+}
+
+.fc-link:hover .fc-arrow {
+  transform: translate(3px, -3px);
+}
+
+@media (min-width: 768px) {
+  .fc-body {
+    margin-top: 208px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.04fr);
+    /* The legs span both rows and the first row takes the slack, which is what
+       gives the sticky panel a tall enough area to travel in. */
+    grid-template-rows: 1fr auto;
+    gap: 72px;
+    align-items: start;
+  }
+
+  .fc-legs {
+    grid-column: 1;
+    grid-row: 1 / span 2;
+  }
+
+  /* Wide: the window does not glide along with the scroll — it STEPS. It
+     starts beside the first waypoint, and when the pen ties off WPT 02 it
+     moves down to that one and plays its next build there; the same again at
+     WPT 03. Following continuously would make it wallpaper; arriving at each
+     waypoint makes it answer the line. The distances are measured in the
+     build pass and land in `--step-*`. */
+  .fc-side {
+    display: block;
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    align-self: start;
+    transform: translateY(0);
+    transition: transform 1s cubic-bezier(0.33, 0.9, 0.25, 1);
+    will-change: transform;
+  }
+
+  .fc-section[data-pen][data-built] .fc-side {
+    transform: translateY(var(--step-2, 0px));
+  }
+
+  .fc-section[data-pen][data-live] .fc-side {
+    transform: translateY(var(--step-3, 0px));
+  }
+
+  .fc-panel {
+    position: static;
+    margin-left: 0;
+    z-index: auto;
+  }
+
+  .fc-notes {
+    margin-top: 22px;
+  }
+
+  .fc-legs {
+    gap: 116px;
+    padding-left: 64px;
+  }
+
+  .fc-fix {
+    left: calc(-64px + var(--fix-dx, 0px));
+  }
+
+  .fc-leg:nth-child(2) .fc-fix {
+    --fix-dx: 26px;
+  }
+
+  .fc-leg:nth-child(3) .fc-fix {
+    --fix-dx: 8px;
+  }
+
+  .fc-leg-title {
+    font-size: 26px;
+  }
+
+  .fc-stamp {
+    display: flex;
+  }
+
+  .fc-rose {
+    display: block;
+    right: -56px;
+    bottom: 46px;
+    width: 300px;
+    height: 300px;
+  }
+
+  .fc-course {
+    display: block;
+    left: -60px;
+    top: 90px;
+    width: 320px;
+    height: 240px;
+  }
+
+  .fc-actions {
+    margin-top: 104px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fc-plane {
+    display: none;
+  }
+
+  .fc-wl,
+  .fc-shot,
+  .fc-wire,
+  .fc-url,
+  .fc-fix-core,
+  .fc-fix-mark,
+  .fc-wpt-rule,
+  .fc-leg > * {
+    transition: none;
+  }
+
+  .fc-caret {
+    animation: none;
+  }
+}
+
+/* ---- the stub the pass was torn from ------------------------------ */
+
+/* Fills the half of the page the window leaves empty, and prints the facts
+   a recruiter actually asks for. Punched down its left edge, so it reads as
+   the same piece of paper the section arrived on. */
+.fc-pass {
+  position: relative;
+  margin-top: 26px;
+  padding: 18px 20px 18px 30px;
+  border: 1px solid var(--color-line);
+  border-radius: 10px;
+  background: var(--color-paper);
+  display: grid;
+  gap: 12px;
+}
+
+.fc-pass::before {
+  content: "";
+  position: absolute;
+  left: 14px;
+  top: 12px;
+  bottom: 12px;
+  width: 1px;
+  background-image: linear-gradient(
+    var(--color-line) 0 4px,
+    transparent 4px 9px
+  );
+  background-size: 1px 9px;
+}
+
+.fc-pass-row {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.fc-pass-label {
+  font-size: 9.5px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--color-ink-muted);
+  white-space: nowrap;
+}
+
+.fc-pass-value {
+  font-size: 13px;
+  color: var(--color-ink);
+  text-align: right;
+}
+
+.fc-section[data-pen] .fc-pass {
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+
+.fc-section[data-pen][data-built] .fc-pass {
+  opacity: 1;
+  transform: none;
+}
+
+/* The destination, labelled like the three waypoints above it. */
+.fc-dest {
+  margin-bottom: 14px;
+  color: var(--color-accent);
+}
+
+.fc-dest .fc-wpt-rule {
+  width: 40px;
+  background: var(--color-accent);
+}
+
+/* The stub column starts on its own now that it is a sibling of the panel. */
+.fc-notes .fc-tags {
+  margin-top: 0;
+}
+
+/* ------------------------------------------------------------------ */
+/* ------------------------------------------------------------------ */
+/*  CONTACT — the finale                                               */
+/*                                                                     */
+/*  The way in is not a new sheet: it is the sheet ABOVE, sagging on    */
+/*  the thread that runs through it. `--tension` is written by the pen  */
+/*  itself as it descends, so the paper stretches because of the line   */
+/*  rather than alongside it — and `data-cut` releases it flat with an  */
+/*  overshoot at the exact instant the thread lets go. One event, one   */
+/*  seam, and the only place on the site where those are the same.      */
+/*                                                                     */
+/*  Everything the reader eventually reads is written by the FALL:      */
+/*  `data-written` is set on each block as the rope's leading point     */
+/*  passes it. So there is no timeline here, only states on attributes  */
+/*  a falling object sets — which is why all of it reverses on the way  */
+/*  back up, and why none of it reflows.                                */
+/*                                                                     */
+/*  Gated on `data-pen`: without JS the section is four contact lines   */
+/*  on paper, which is the thing that actually matters here.            */
+/* ------------------------------------------------------------------ */
+
+.ct-section {
+  position: relative;
+  isolation: isolate;
+  padding: 0 24px 92px;
+  background: var(--color-paper-alt);
+  --sag: 48px;
+  --tension: 0;
+}
+
+@media (min-width: 768px) {
+  .ct-section {
+    padding: 0 64px 124px;
+    --sag: 84px;
+  }
+}
+
+.ct-section[data-grab] {
+  cursor: grab;
+}
+
+.ct-section[data-hold] {
+  cursor: grabbing;
+  user-select: none;
+}
+
+/* ---- the seam: the sheet above, hanging on the thread ---- */
+
+.ct-seam {
+  position: absolute;
+  inset: 0 0 auto;
+  height: var(--sag);
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  filter: drop-shadow(0 4px 5px rgba(22, 21, 19, 0.06));
+}
+
+.ct-seam svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Scaled from the top edge, so the straight part of the seam never moves and
+   only the sag deepens. `--tension` is written on the scrub frame; the short
+   transition is not for that — it is for the way BACK, where the flag comes
+   off with the paper still held flat and it would otherwise drop into its sag
+   in one frame. */
+.ct-seam-fill,
+.ct-seam-ink {
+  transform: scaleY(var(--tension));
+  transform-origin: 0 0;
+  transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.ct-seam-fill {
+  fill: var(--color-paper);
+}
+
+.ct-seam-ink {
+  fill: none;
+  stroke: var(--color-accent);
+  stroke-width: 1.2;
+  stroke-linecap: round;
+  opacity: calc(0.12 + var(--tension) * 0.34);
+}
+
+/* The release. The overshoot in the curve is the whole point: paper under
+   load does not ease back, it flicks. */
+.ct-section[data-cut] .ct-seam-fill,
+.ct-section[data-cut] .ct-seam-ink {
+  transform: scaleY(0);
+  transition: transform 0.42s cubic-bezier(0.2, 1.6, 0.36, 1);
+}
+
+/* ---- the paper ---- */
+
+/* Ruled like a letter — the fifth kind of paper on the site, and the only one
+   that is about writing rather than about drafting. */
+.ct-paper {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.5;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0 39px,
+    var(--color-line) 39px 40px
+  );
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    #000 120px,
+    #000 78%,
+    transparent 96%
+  );
+  mask-image: linear-gradient(to bottom, transparent 0, #000 120px, #000 78%, transparent 96%);
+}
+
+/* The margin rule of a letter sheet. It also gives the taut run something to
+   be read against — a straight line reads as straight next to another one. */
+.ct-margin {
+  position: absolute;
+  top: 120px;
+  bottom: 22%;
+  left: 24px;
+  width: 1px;
+  z-index: 0;
+  background: var(--color-accent);
+  opacity: 0.16;
+  pointer-events: none;
+  -webkit-mask-image: linear-gradient(to bottom, #000 0, #000 62%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0, #000 62%, transparent 100%);
+}
+
+@media (min-width: 768px) {
+  .ct-margin {
+    left: 64px;
+  }
+}
+
+/* ---- the stage the taut run hangs in ---- */
+
+.ct-stage {
+  position: relative;
+  z-index: 1;
+  min-height: 34vh;
+}
+
+@media (min-width: 768px) {
+  .ct-stage {
+    min-height: 42vh;
+  }
+}
+
+.ct-thread {
+  position: absolute;
+  inset: 0;
+  height: 100%;
+  width: 100%;
+  pointer-events: none;
+}
+
+/* The drawn line does not fade out when it is cut — it is REPLACED, on the
+   same frame, by the rope that was sampled from it. A transition here would
+   show both at once. */
+.ct-section[data-cut] .ct-thread {
+  opacity: 0;
+}
+
+/* ---- what is left of the line, once it is an object ---- */
+
+.ct-fall {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+
+ /* No fade in either direction, and that is the point. Going down, the rope
+    is sampled from the drawn line on the frame it replaces it; going up, it is
+    reeled back onto the drawn line before the flag comes off. Both hand-overs
+    are between two identical shapes, so a cross-fade would only blur a swap
+    that is already invisible. */
+.ct-rope {
+  opacity: 0;
+}
+
+.ct-section[data-cut] .ct-rope {
+  opacity: 1;
+}
+
+/* ---- the copy the fall writes ---- */
+
+.ct-inner {
+  position: relative;
+  z-index: 2;
+  margin: 0 auto;
+  max-width: 72rem;
+  padding-top: 8px;
+}
+
+/* Before the fall there is nothing on the page. Each block is inked when the
+   rope's leading point passes it, and only under `data-pen` — without JS the
+   hidden state never applies.
+
+   `visibility`, not only `opacity`. Opacity zero still leaves a composited
+   layer, and on a retina display those layers were coming through as faint
+   grey rectangles on the paper — the shape of words that were not written yet.
+   `visibility: hidden` paints nothing at all. It cannot be animated, so it is
+   switched at the END of the fade going out and at the START coming in, which
+   is what the two delays below are for.
+
+   Both delays come off `--ink-delay`, because the stagger has to be part of
+   the same declaration: a bare `transition-delay` on a later rule would
+   override the visibility delay too, and the block would blink out in the
+   middle of its own fade. */
+.ct-section[data-pen] [data-ink] {
+  --ink-delay: 0s;
+  --ink-vis: calc(var(--ink-delay) + 0.45s);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(18px);
+  transition:
+    opacity 0.45s ease var(--ink-delay),
+    transform 0.6s cubic-bezier(0.22, 1, 0.36, 1) var(--ink-delay),
+    visibility 0s linear var(--ink-vis);
+}
+
+.ct-section[data-pen] [data-ink][data-written] {
+  --ink-vis: 0s;
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+}
+
+/* The heading's words are handled by GSAP, so the wrapper only carries the
+   visibility — moving it as well would double the motion on it. */
+.ct-section[data-pen] .ct-heading-wrap {
+  opacity: 1;
+  transform: none;
+}
+
+/* The contact lines lie BELOW the floor, so nothing falls past them: they are
+   written by the landing itself, one after another out of the point of impact.
+   A stagger in CSS rather than a timeline, so it still reverses by itself.
+
+   The delay belongs to the state being transitioned TO, so the two directions
+   get their own — and the way back RUNS BACKWARDS. The thread is being reeled
+   up past them, so the line nearest the floor is the first to go; the same
+   delays in both directions is what made scrolling up look like the page
+   simply switching off. */
+.ct-section[data-pen][data-landed] .ct-row {
+  --ink-vis: 0s;
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+}
+
+ /* Row one needs its own: the reversed rule below gives it 0.21s, and
+    without this it would keep that delay on the way in too. */
+.ct-section[data-pen][data-landed] .ct-row:nth-child(1) {
+  --ink-delay: 0s;
+}
+
+.ct-section[data-pen][data-landed] .ct-row:nth-child(2) {
+  --ink-delay: 0.07s;
+}
+
+.ct-section[data-pen][data-landed] .ct-row:nth-child(3) {
+  --ink-delay: 0.14s;
+}
+
+.ct-section[data-pen][data-landed] .ct-row:nth-child(4) {
+  --ink-delay: 0.21s;
+}
+
+.ct-section[data-pen] .ct-row:nth-child(1) {
+  --ink-delay: 0.21s;
+}
+
+.ct-section[data-pen] .ct-row:nth-child(2) {
+  --ink-delay: 0.14s;
+}
+
+.ct-section[data-pen] .ct-row:nth-child(3) {
+  --ink-delay: 0.07s;
+}
+
+.ct-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 12px;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+
+.ct-eyebrow::after {
+  content: "";
+  display: block;
+  width: 46px;
+  height: 1px;
+  background: currentColor;
+  opacity: 0.5;
+}
+
+ /* Sized against the FALL, not just against the page. Everything between the
+    foot of the taut run and the first contact rule is distance the rope has to
+    cross while the reader watches, and at 6.4vw this heading alone was three
+    lines of 96px — it pushed the place the thread lands to the very bottom
+    edge of the screen at the moment it was cut. */
+.ct-heading-wrap {
+  margin-top: 20px;
+  font-size: clamp(2.1rem, 5.4vw, 3.9rem);
+}
+
+.ct-heading {
+  max-width: 19ch;
+  font-size: 1em;
+  line-height: 1.04;
+  letter-spacing: -0.025em;
+  color: var(--color-ink);
+}
+
+.ct-lead {
+  margin-top: 22px;
+  max-width: 46ch;
+  font-size: 15px;
+  line-height: 1.75;
+  color: var(--color-ink-muted);
+}
+
+/* ---- the contact lines ---- */
+
+ /* The gap above the list is not air, and it is not free either. It is the
+    room the heap needs — and every pixel of it also pushes the place the
+    thread lands further down the screen at the moment it is cut. Measured
+    against that: the heap is about 25px tall, and this is what is left after
+    giving the fall somewhere to finish that the reader can still see. */
+.ct-list {
+  margin-top: 88px;
+}
+
+@media (min-width: 768px) {
+  .ct-list {
+    margin-top: 100px;
+  }
+}
+
+.ct-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 22px 0 20px;
+}
+
+@media (min-width: 768px) {
+  .ct-row {
+    padding: 30px 0 28px;
+  }
+}
+
+/* The rule above each line is drawn, not just present: it wipes in from the
+   left the way the pen would have drawn it, at the moment the rope goes past. */
+.ct-rule {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 1px;
+  background: var(--color-line);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1), background 0.35s ease;
+}
+
+.ct-section:not([data-pen]) .ct-rule,
+.ct-section[data-landed] .ct-rule {
+  transform: scaleX(1);
+}
+
+.ct-list .ct-row:last-child::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  height: 1px;
+  background: var(--color-line);
+}
+
+.ct-hit {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+@media (min-width: 768px) {
+  .ct-hit {
+    flex-direction: row;
+    align-items: baseline;
+    gap: 26px;
+  }
+}
+
+.ct-index {
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-accent);
+  opacity: 0.55;
+  transition: opacity 0.3s ease;
+}
+
+@media (min-width: 768px) {
+  .ct-index {
+    width: 34px;
+    flex: none;
+  }
+}
+
+.ct-label {
+  flex: none;
+  font-size: 10.5px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--color-ink-muted);
+}
+
+@media (min-width: 768px) {
+  .ct-label {
+    width: 88px;
+    font-size: 11px;
+  }
+}
+
+/* Big on purpose. Four lines is all this page has left to say, and on paper
+   they have to carry the section the way the flood used to. */
+.ct-value {
+  position: relative;
+  display: inline-block;
+  min-width: 0;
+  max-width: 100%;
+  /* The lower bound is a measurement, not taste: the longest thing on the
+     page is the email address, and an address that ends in an ellipsis is not
+     a contact detail. At 390px it has about 260px to live in beside the
+     button, which is what sets 4.4vw. */
+  font-size: clamp(1.02rem, 4.4vw, 2.5rem);
+  line-height: 1.12;
+  letter-spacing: -0.015em;
+  color: var(--color-ink);
+  transition: color 0.35s ease, transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* The clipping lives on the TEXT, not on the value: the hand-drawn underline
+   hangs below the baseline, and an ellipsis box would have cut it off. */
+.ct-value-text {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Hover underlines it BY HAND — the site's own stroke, drawn, not a border
+   that appears. The last echo of the pen on the page. */
+.ct-scribble {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -0.16em;
+  width: 100%;
+  height: 9px;
+  overflow: visible;
+  /* Wiped in from the left rather than dash-offset in. `pathLength` is
+     normalised in USER units, and `non-scaling-stroke` moves the dash pattern
+     into screen units, so the two together silently draw the whole stroke at
+     once — which is what the first version did. A clip has no such argument
+     with the stroke, and reads the same: left to right, like a pen. */
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path 0.5s cubic-bezier(0.33, 1, 0.68, 1);
+}
+
+.ct-scribble path {
+  fill: none;
+  stroke: var(--color-accent);
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.ct-hit:hover .ct-scribble,
+.ct-hit:focus-visible .ct-scribble {
+  clip-path: inset(0 0 0 0);
+}
+
+.ct-hit:hover .ct-value,
+.ct-hit:focus-visible .ct-value {
+  color: var(--color-accent);
+  transform: translateX(8px);
+}
+
+.ct-hit:hover .ct-index {
+  opacity: 1;
+}
+
+.ct-row:hover .ct-rule {
+  background: var(--color-accent);
+}
+
+.ct-act {
+  flex: none;
+  padding: 8px 15px;
+  border: 1px solid var(--color-line);
+  border-radius: 999px;
+  background: transparent;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-ink-muted);
+  cursor: pointer;
+  /* Colour only: `Call` and `Open` are magnetic links and GSAP writes their
+     transform inline — a CSS transform here would fight it. */
+  transition: color 0.35s ease, border-color 0.35s ease, background 0.35s ease;
+}
+
+.ct-act:hover,
+.ct-act[data-done] {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: var(--color-paper);
+}
+
+/* ------------------------------------------------------------------ */
+/*  FOOTER                                                             */
+/*                                                                     */
+/*  The line does not end IN the footer any more — it ends on its top   */
+/*  edge, as a heap of thread lying on the seam between the two. So the */
+/*  footer draws no rule of its own: the rope is the rule, and it is    */
+/*  the only one on the site that was put there by gravity.             */
+/*                                                                     */
+/*  It arrives when the rope lands, not when it is cut; `:has()` carries */
+/*  the flag across the sibling boundary. Deliberately quiet — after    */
+/*  something has fallen down the page, the loudest thing here is a     */
+/*  monogram.                                                           */
+/* ------------------------------------------------------------------ */
+
+.ft {
+  position: relative;
+  isolation: isolate;
+  background: var(--color-paper);
+  padding: 54px 24px 60px;
+}
+
+@media (min-width: 768px) {
+  .ft {
+    padding: 68px 64px 84px;
+  }
+}
+
+.ft-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 22px;
+  margin: 0 auto;
+  max-width: 72rem;
+  text-align: center;
+}
+
+@media (min-width: 768px) {
+  .ft-inner {
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: space-between;
+    text-align: left;
+  }
+}
+
+.ft-id {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+
+@media (min-width: 768px) {
+  .ft-id {
+    align-items: flex-start;
+  }
+}
+
+.ft-mark {
+  font-size: 20px;
+  letter-spacing: 0.05em;
+  color: var(--color-ink);
+}
+
+.ft-place {
+  font-size: 10.5px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-ink-muted);
+}
+
+.ft-note {
+  max-width: 48ch;
+  font-size: 12px;
+  line-height: 1.75;
+  color: var(--color-ink-muted);
+}
+
+.ft-dot {
+  display: inline-block;
+  width: 3px;
+  height: 3px;
+  margin: 0 9px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  vertical-align: middle;
+  opacity: 0.75;
+}
+
+.ft-side {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.ft-link,
+.ft-top {
+  font-size: 10.5px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-ink-muted);
+  transition: color 0.3s ease;
+}
+
+.ft-link:hover,
+.ft-top:hover {
+  color: var(--color-accent);
+}
+
+.ft-top {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+.ft-top-arrow {
+  display: block;
+  width: 11px;
+  height: 17px;
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.ft-top-arrow svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.ft-top-arrow path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.ft-top:hover .ft-top-arrow {
+  transform: translateY(-4px);
+}
+
+/* The copy rises once the thread has come to rest, and only when there is a
+   thread to come to rest: without JS the hidden state never applies. */
+main:has(#contact[data-pen]) ~ .ft .ft-rise {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+
+main:has(#contact[data-landed]) ~ .ft .ft-rise {
+  opacity: 1;
+  transform: none;
+  transition-delay: 0.18s;
+}
