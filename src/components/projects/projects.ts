@@ -100,6 +100,16 @@ export const PROJECTS: Project[] = [
     ],
   },
   {
+    name: "In Plain Words",
+    status: "Live",
+    href: "https://in-plain-words.vercel.app/",
+    domain: "in-plain-words.vercel.app",
+    hook: "A solo law practice site that makes legal services feel human.",
+    body: "A client-first legal website built around plain-language communication — featuring a legalese translator, an interactive pricing calculator, a case archive with anonymized matters, and a transparent four-step process overview. Designed to demystify legal work and build trust before the first call.",
+    tags: ["React", "Next.js", "TypeScript", "Tailwind"],
+    shots: [],
+  },
+  {
     name: "Virtual Guitar",
     subtitle: "React",
     status: "Live",

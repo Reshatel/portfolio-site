@@ -3,6 +3,8 @@ import { Bricolage_Grotesque, Inter } from "next/font/google";
 import "./globals.css";
 import SmoothScrollProvider from "@/components/providers/SmoothScrollProvider";
 import { SITE_URL } from "@/lib/site";
+import { Analytics } from "@vercel/analytics/next"
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const bricolage = Bricolage_Grotesque({
   variable: "--font-bricolage",
@@ -69,6 +71,8 @@ export default function RootLayout({
       <body className="bg-paper text-ink font-body antialiased">
         <script dangerouslySetInnerHTML={{ __html: NO_SCROLL_RESTORE }} />
         <SmoothScrollProvider>{children}</SmoothScrollProvider>
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );

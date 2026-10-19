@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import Image from "next/image";
 import { useGSAP } from "@gsap/react";
 import { gsap, SplitText, ScrollTrigger } from "@/lib/gsap";
 import { useThreadSegment } from "@/components/thread/SiteThread";
@@ -19,7 +20,7 @@ export default function About() {
   const bodyRef = useRef<HTMLParagraphElement>(null);
   const portraitRef = useRef<HTMLDivElement>(null);
   const frameRef = useRef<SVGPathElement>(null);
-  const monogramRef = useRef<HTMLDivElement>(null);
+
   const chipsRef = useRef<HTMLUListElement>(null);
   const figuresRef = useRef<HTMLDivElement>(null);
   const threadPathRef = useRef<SVGPathElement>(null);
@@ -136,12 +137,7 @@ export default function About() {
               drawSVG: "100%",
               duration: 1.4,
               ease: "power2.inOut",
-            })
-            .from(
-              monogramRef.current,
-              { opacity: 0, y: 18, duration: 0.8, ease: "power2.out" },
-              "-=0.7",
-            );
+            });
 
           gsap.to(portraitRef.current, {
             yPercent: -7,
@@ -317,9 +313,13 @@ export default function About() {
               ref={portraitRef}
               className="relative aspect-[4/5] w-full overflow-hidden rounded-[18px] bg-paper"
             >
-              <div
-                aria-hidden
-                className="absolute inset-0 bg-[radial-gradient(120%_90%_at_50%_0%,rgba(193,101,47,0.07),transparent_65%)]"
+              <Image
+                src="/photo.jpg"
+                alt="Maksym Ostapchuk"
+                fill
+                className="object-cover"
+                sizes="(max-width: 768px) 100vw, 400px"
+                priority
               />
               <svg
                 aria-hidden
@@ -333,17 +333,6 @@ export default function About() {
                   d="M20,28 C110,20 292,18 380,27 C389,126 388,376 379,473 C288,481 108,483 21,474 C13,364 12,126 20,28 Z"
                 />
               </svg>
-              <div
-                ref={monogramRef}
-                className="absolute inset-0 flex flex-col items-center justify-center gap-2"
-              >
-                <span className="font-display text-5xl font-semibold tracking-tight text-ink/15">
-                  M.O.
-                </span>
-                <span className="font-body text-[10px] uppercase tracking-[0.3em] text-ink-muted/60">
-                  Kropyvnytskyi, UA
-                </span>
-              </div>
             </div>
 
             <ul ref={chipsRef} className="flex flex-wrap gap-2">
