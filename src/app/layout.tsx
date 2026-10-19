@@ -2,9 +2,12 @@ import type { Metadata } from "next";
 import { Bricolage_Grotesque, Inter } from "next/font/google";
 import "./globals.css";
 import SmoothScrollProvider from "@/components/providers/SmoothScrollProvider";
+import Script from "next/script";
 import { SITE_URL } from "@/lib/site";
 import { Analytics } from "@vercel/analytics/next"
 import { SpeedInsights } from "@vercel/speed-insights/next";
+
+const GA_ID = "G-F6ZTR6EERR";
 
 const bricolage = Bricolage_Grotesque({
   variable: "--font-bricolage",
@@ -68,6 +71,20 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${bricolage.variable} ${inter.variable}`}>
+      <head>
+        <Script
+          src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', '${GA_ID}');
+          `}
+        </Script>
+      </head>
       <body className="bg-paper text-ink font-body antialiased">
         <script dangerouslySetInnerHTML={{ __html: NO_SCROLL_RESTORE }} />
         <SmoothScrollProvider>{children}</SmoothScrollProvider>
